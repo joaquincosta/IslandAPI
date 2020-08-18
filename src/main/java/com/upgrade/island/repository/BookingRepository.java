@@ -24,8 +24,8 @@ public interface BookingRepository extends CrudRepository<Booking, Integer> {
         .findFirst();
   }
 
-  @Query("select b.checkin from Booking b where b.status = :status and b.checkin between :from and :to order by b.checkin asc")
-  List<LocalDate> findInRange(@Param("from") final LocalDate from, @Param("to") final LocalDate to
+  @Query("select b from Booking b where b.status = :status and b.checkin between :from and :to or b.checkout between :from and :to order by b.checkin asc")
+  List<Booking> findInRange(@Param("from") final LocalDate from, @Param("to") final LocalDate to
       , @Param("status") BookingStatus status);
 
 }

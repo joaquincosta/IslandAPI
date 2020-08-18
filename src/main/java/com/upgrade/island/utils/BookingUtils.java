@@ -13,4 +13,8 @@ public class BookingUtils {
     Boolean overlappedCheckout = checkout.compareTo(bookingCheckin) > 0 && checkout.compareTo(bookingCheckout) <= 0;
     return overlappedCheckin || overlappedCheckout;
   }
+
+  public static Boolean dateOverlapped(final LocalDate date, final Booking booking) {
+    return date.compareTo(booking.getCheckin()) >= 0 && date.compareTo(booking.getCheckout()) < 0;
+  }
 }
