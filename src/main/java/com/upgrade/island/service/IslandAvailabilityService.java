@@ -13,7 +13,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.upgrade.island.utils.BookingUtils.dateOverlapped;
-import static com.upgrade.island.utils.BookingUtils.isOverlapped;
 
 @RequiredArgsConstructor
 @Service
@@ -27,7 +26,7 @@ public class IslandAvailabilityService {
     Assert.isTrue(fromDate.compareTo(toDate) < 0, "The  must be before to");
     Assert.isTrue(toDate.compareTo(LocalDate.now().plusDays(31)) < 0, "Cannot book more than 30 days before");
     List<Booking> bookings = repository.findInRange(fromDate, toDate, BookingStatus.BOOKED);
-    return fromDate.datesUntil(toDate)
+    return fromDate.datesUntil(toDate.plusDays(1))
         .filter(date -> bookings.stream().noneMatch(booking -> dateOverlapped(date,booking)))
         .collect(Collectors.toList());
   }
