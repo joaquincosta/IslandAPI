@@ -9,6 +9,7 @@ import com.upgrade.island.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -21,6 +22,7 @@ public class IslandBookingService {
 
   public Booking createBooking(final String username, final String email,
                                final LocalDate checkin, final LocalDate checkout) {
+    checkStay(checkin, checkout);
     Booking booking = new Booking();
     booking.setUsername(username);
     booking.setEmail(email);
@@ -41,6 +43,7 @@ public class IslandBookingService {
   }
 
   public void updateBooking(final Integer bookingId, final LocalDate newCheckin, final LocalDate newCheckout) {
+    checkStay(newCheckin, newCheckout);
     Booking booking = getOptionalBooking(repository.findById(bookingId), bookingId);
     checkAndSave(booking, newCheckin, newCheckout);
   }
@@ -65,6 +68,10 @@ public class IslandBookingService {
       throw new CancelledBookingException(bookingId);
     }
     return booking;
+  }
+
+  private void checkStay(LocalDate checkin, LocalDate checkout) {
+    Assert.isTrue(checkin.datesUntil(checkout).count() <= 3, "Stay cannot be more than 3 days");
   }
 
 
