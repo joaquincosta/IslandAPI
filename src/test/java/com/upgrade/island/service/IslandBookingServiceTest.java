@@ -12,27 +12,23 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public class IslandBookingServiceTest {
 
-  private static final String  USERNAME = "jhondoe";
-  private static final String EMAIL = "jhondoe@upgrade.com";
+  private static final String USERNAME = "johndoe";
+  private static final String EMAIL = "johndoe@upgrade.com";
   private static final String NOT_AVAILABLE_DATES_ERROR_MSG = "Requested dates checkin: %s checkout: %s is not available";
   private static final String CANCELLED_BOOKING_ERROR_MSG = "The booking with Id %s is canceled";
   private static final String BOOKING_NOT_FOUND_ERROR_MSG = "The booking with Id %s was not found";
 
   private BookingRepository repository;
   private IslandBookingService service;
-  private DateTimeFormatter dtf;
-
 
   @BeforeEach
   public void init() {
     repository = Mockito.mock(BookingRepository.class);
     service = new IslandBookingService(repository);
-    dtf = DateTimeFormatter.ISO_DATE;
   }
 
   @Test
