@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.upgrade.island.dto.BookingDTO;
 import com.upgrade.island.dto.CreatedBookingDTO;
 import com.upgrade.island.integration.db.BookingDBContainer;
+import com.upgrade.island.model.Booking;
 import com.upgrade.island.repository.BookingRepository;
 import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +25,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -58,10 +64,27 @@ public class ConcurrencyIntegrationTest {
         .content(createPostBody()))
         .andExpect(status().isOk());
     CreatedBookingDTO response = mapper.readValue(resultActions.andReturn().getResponse().getContentAsString(), CreatedBookingDTO.class);
-    this.mockMvc.perform(MockMvcRequestBuilders.get("/api/island/booking/{bookingId}",response.getBookingId())
+    this.mockMvc.perform(MockMvcRequestBuilders.get("/api/island/booking/{bookingId}", response.getBookingId())
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
   }
+
+  @Test
+  public void testOverlappedBooking() {
+    List<Thread> tasks = IntStream.rangeClosed(1, 50).<Runnable>mapToObj(i -> () -> {
+      try {
+        ConcurrencyIntegrationTest.this.mockMvc.perform(MockMvcRequestBuilders.post("/api/island/booking")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(createPostBody()));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }).map(Thread::new).collect(Collectors.toList());
+    tasks.stream().forEach(Thread::start);
+    Iterable<Booking> all = repository.findAll();
+    Assertions.assertEquals(1,List.of(all).size());
+  }
+
 
   @SneakyThrows
   private String createPostBody() {
