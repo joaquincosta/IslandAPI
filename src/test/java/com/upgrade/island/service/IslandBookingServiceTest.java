@@ -35,7 +35,7 @@ public class IslandBookingServiceTest {
   public void bookOneDay() {
     LocalDate checkin = LocalDate.now().plusDays(1);
     LocalDate checkout = checkin.plusDays(1);
-    Mockito.when(repository.findActiveInDates(checkin, checkout)).thenReturn(Optional.empty());
+    Mockito.when(repository.findActiveInDates(checkin, checkout, Mockito.any(Integer.class))).thenReturn(Optional.empty());
     Booking booking = service.createBooking(USERNAME, EMAIL, checkin, checkout);
     Assertions.assertNotNull(booking);
     Assertions.assertEquals(USERNAME, booking.getUsername());
@@ -68,7 +68,7 @@ public class IslandBookingServiceTest {
   public void failBookUnavailableDate() {
     LocalDate checkin = LocalDate.now().plusDays(1);
     LocalDate checkout = checkin.plusDays(1);
-    Mockito.when(repository.findActiveInDates(Mockito.any(LocalDate.class), Mockito.any(LocalDate.class)))
+    Mockito.when(repository.findActiveInDates(Mockito.any(LocalDate.class), Mockito.any(LocalDate.class), Mockito.any(Integer.class)))
         .thenReturn(Optional.of(new Booking()));
     NotAvailableDatesException ex = Assertions.assertThrows(NotAvailableDatesException.class, () ->
         service.createBooking(USERNAME, EMAIL, checkin, checkout));
@@ -81,7 +81,7 @@ public class IslandBookingServiceTest {
     LocalDate checkin = LocalDate.now().plusDays(1);
     LocalDate checkout = checkin.plusDays(1);
     Mockito.when(repository.findById(Mockito.anyInt())).thenReturn(Optional.of(booking));
-    Mockito.when(repository.findActiveInDates(checkin, checkout)).thenReturn(Optional.empty());
+    Mockito.when(repository.findActiveInDates(checkin, checkout, booking.getId())).thenReturn(Optional.empty());
     service.updateBooking(1, checkin, checkout);
   }
 
@@ -91,7 +91,7 @@ public class IslandBookingServiceTest {
     LocalDate checkin = LocalDate.now().plusDays(1);
     LocalDate checkout = checkin.plusDays(1);
     Mockito.when(repository.findById(Mockito.anyInt())).thenReturn(Optional.of(booking));
-    Mockito.when(repository.findActiveInDates(checkin, checkout)).thenReturn(Optional.of(booking));
+    Mockito.when(repository.findActiveInDates(checkin, checkout, booking.getId())).thenReturn(Optional.of(booking));
     NotAvailableDatesException ex = Assertions.assertThrows(NotAvailableDatesException.class, () ->
         service.updateBooking(1, checkin, checkout));
     Assertions.assertEquals(String.format(NOT_AVAILABLE_DATES_ERROR_MSG, checkin, checkout), ex.getMessage());

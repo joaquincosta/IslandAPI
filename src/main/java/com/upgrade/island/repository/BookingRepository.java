@@ -16,10 +16,11 @@ import java.util.stream.StreamSupport;
 @Repository
 public interface BookingRepository extends CrudRepository<Booking, Integer> {
 
-  default Optional<Booking> findActiveInDates(final LocalDate checkin, final LocalDate checkout) {
+  default Optional<Booking> findActiveInDates(final LocalDate checkin, final LocalDate checkout, Integer id) {
     Iterable<Booking> bookings = this.findAll();
     return StreamSupport.stream(bookings.spliterator(), false)
         .filter(booking -> BookingStatus.BOOKED.equals(booking.getStatus())
+            && !booking.getId().equals(id)
             && BookingUtils.isOverlapped(checkin, checkout, booking))
         .findFirst();
   }

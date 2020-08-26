@@ -7,6 +7,7 @@ import com.upgrade.island.model.Booking;
 import com.upgrade.island.model.BookingStatus;
 import com.upgrade.island.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.Synchronized;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -48,9 +49,9 @@ public class IslandBookingService {
     checkAndSave(booking, newCheckin, newCheckout);
   }
 
-  @Transactional
+  @Synchronized
   protected void checkAndSave(final Booking booking, final LocalDate checkin, final LocalDate checkout) {
-    Optional<Booking> booked = repository.findActiveInDates(checkin, checkout);
+    Optional<Booking> booked = repository.findActiveInDates(checkin, checkout, booking.getId());
     if (booked.isPresent()) {
       throw new NotAvailableDatesException(checkin, checkout);
     }
